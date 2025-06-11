@@ -1,0 +1,77 @@
+# System files #
+################
+.DS_Store
+
+# Compiled sources #
+####################
+target
+classpath.out
+dependency-reduced-pom.xml
+*.jar
+
+# IDE metadata #
+####################
+.classpath
+.project
+.settings
+.idea
+.vscode
+
+# Editor temporary #
+####################
+*.swp
+
+# Python #
+##########
+__pycache__
+/venv/
+.python-version
+
+# Data #
+########
+*.zip
+*.tsv
+*.csv
+*.tar.gz
+*.pt
+data/raw-data
+data/images
+data/embeddings
+data/annotations
+images*
+data*
+results*
+*Results*
+vault*
+output/
+delta-v*
+
+# Experiment Output #
+#####################
+backend/results/
+backend/models/trained
+backend/data/all-fin-photos
+backend/results
+models/trained
+output.txt
+
+# Experimental #
+#####################
+NEW*
+
+# Authentication secret #
+#####################
+backend/secret.txt
+secret*
+
+# Tests #
+#####################
+!tests/data/*
+
+# Database #
+#####################
+*.db
+
+# Models #
+#####################
+sam2/
