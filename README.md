@@ -2,37 +2,26 @@
 
 ## Directory Structure
 
-### /api
-Contains api references and rules.
-
 ### /backend
 All code responsible for data processing, retrieval, and handling database operations.
 - /db - All database CRUD functionality.
-- /model - Data loadeing and retrieval code; these files interact directly with trained model data saved as .pt files.
+- /evaluation - Model and retrieval evaluation and visualization scripts. 
+- /learning - Code for training models including evaluator for in training, loss function implementation, training scripts and data loaders for contrastive learning.
+- /models - Code with architecture for untrained backbone and projection head, contains trained directory where trained models are stored.
+- /retrieval - Instance retrieval code responsible for applying trained model to generate and search through embeddings for the data and provide retrieval results.
 - utils.py - General utility functions used throughout the backend directory.
 - constants.py - Constants used throughout the backend directory.
 - analyze_data.py - Data analysis utilities for data cleaning and summarization.
-- convert_data.py - Parses data in the data/raw-data directory and produces parsed annotations files and images for use by the
-database and frontend.
-
-### /frontend
-All code files including html, css, and javascript to display and run UI as well as python API handler files.
-- /cli - Interface to start the server via the command line
-- /static - Browser relevant code including style sheets, images and files accessed by the GUI, and JS files.
-- /static/js/modules/sharkMatcher - Client side API code including endpoints, request and response handlers.
-- /static/js/modules/webui - GUI handling code reponsible for page rendering, navigation and event handling.
-- handlers.py - API request helper functions, handle the core of requests.
-- server.py - Python server code and server side API endpoint definitions.
-- common.py - Common utility functions.
-- *.py - API handler scripts for corresponding object types.
+- convert_data.py - Parses data in the database and produces annotations files for use during model training and retrieval. Also prepares image directory for use in model training and retrieval.
 
 ### /data
 All data in both raw format received parsed format, also stores trained models for use by Shark Matcher
-- /annotations - Parsed annotations files (tsv files storing metadata and match information on each image). These files are read by model training and retrieval scripts and used to populate the database.
+- /annotations - Parsed annotations files (tsv files storing metadata and match information on each image). These files are used during model training and retrieval.
 - /database-format. CSV files containing data formatted according to the database schema for loading into the database. These 
 files are produced by /db/scripts reading data in this /data directory.
-- /embeddings - Pytorch (.pt) embeddings files built via the shark-identification-model.
+- /embeddings - Pytorch (.pt) embeddings files and dataset files storing cached dataset, embeddings and nearest neighbor data.
 - /images - Flat directory containing all parsed images.
+- /segmented-images - Flat directory containing all segmented images. These images should correspond directly to those in the /images directory, with the same names.
 - /raw-data - Unparsed matching spreadsheet csv files and unparsed images in nested directory structure as received from Block lab or other original source.
 
 ### /data_out
@@ -44,40 +33,20 @@ Database directory with database schema, files, population and snapshot scripts.
 - create_database.sql - Database schema.
 - sharkMatcher.db - Sqlite database file.
 
-### /tests
-Testing directory with tests for functionality and style.
-- /data - Small dataset for testing.
-- python_style_tests.py - Pylint style testing script.
-- run_tests.sh - Script to allow running a desired set of tests.
-- *.py - Tests for corresponding python files.
-
-
 ## Workflow
-#### Prerequisites TODO:
+#### Prerequisites:
 - Ensure dependencies (`requirements.txt`).
     pip install -r requirements.txt
 
 1. Clone or pull the latest version of the shark-matcher repository.
 2. Assure data directory is populated with all the necessary files and structure outlined in the **data** section above.
-
-- Model files stored in data/embeddings
-- Parsed annotations in the /data/annotations directory. Parsed annotations can be produced from clean raw-data with the convert_data script. `python3 backend/convert_data.py `.
-
-4. Populate the database with the parsed data. `./db/scripts/populate_db.sh [-h for info]`.
-- `./db/scripts/print_db.sh` can print a preview of the database to verify.
-
-#### Running the Server:
-To run the server, the database needs to be populated, formatted annotations files need to be present in data/annotations, and embeddings and neighbors files must be stored in data/embeddings. All images referenced in the 
-database must also be present in the frontent/static/images directory.
-
-After having assured the data and embeddings dependencies above, run the server from /shark-matcher with:
-    `./shark_identification.sh -r`
+- Critical items are a populated /images directory and either a "raw annotations" file in raw-data/annotations or a database snapshot in /database-format that can be used to populate the database to complete any of the subsequent operations.
 
 #### Model Training:
-
 1. Make sure that all necessary images are located in the data/raw-data/images directory and that the data/images directory is empty or free of old/irrelevant data. Placing new images in raw-data/images is needed so they can be parsed and converted by the convert_data script which copies them to the data/imges directory in the next step.
 2. Format the images and populate the formatted image directory data/images by running the format_image_directory() method in convert_data.py.
-3. Populate the database with data from a raw annotations file or database snapshot by running ./db/scripts/populate_db.sh. See the options for snapshot vs annotations population.
+3. Populate the database with data from a raw annotations file or database snapshot by running `./db/scripts/populate_db.sh [-h for info]` See the options for snapshot vs annotations population.
+- `./db/scripts/print_db.sh` can print a preview of the database to verify.
 4. With the database populated you can generate the formatted annotations files by running the prepare_dataset() function in convert_data.py.
 
 You should now have the images, the database, and the tsv annotations files in their respective locations and should be ready to begin training. Training will then create SharkfinDataset objects for the train and test sets based on the splits in the annotations files, which you created by running prepare_dataset.
